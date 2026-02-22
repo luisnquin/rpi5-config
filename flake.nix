@@ -3,14 +3,48 @@
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
+    nixos-raspberrypi = {
+      url = "github:nvmd/nixos-raspberrypi/main";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    disko = {
+      url = "github:nix-community/disko";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    niri = {
+      url = "github:sodiboo/niri-flake";
+      inputs = {
+        nixpkgs.follows = "nixpkgs";
+        nixpkgs-stable.follows = "nixpkgs";
+      };
+    };
   };
 
-  outputs = {
-    self,
-    nixpkgs,
+  outputs = inputs @ {
+    nixos-raspberrypi,
+    disko,
+    ...
   }: {
-    packages.x86_64-linux.hello = nixpkgs.legacyPackages.x86_64-linux.hello;
+    nixosConfigurations.ryx = nixos-raspberrypi.lib.nixosSystemFull {
+      specialArgs = inputs // { inherit inputs; };
+      modules = [
+        ({inputs, ...}: {
+          disabledModules = ["${inputs.nixpkgs}/nixos/modules/rename.nix"];
 
-    packages.x86_64-linux.default = self.packages.x86_64-linux.hello;
+          imports = with nixos-raspberrypi.nixosModules; [
+            raspberry-pi-5.base
+            raspberry-pi-5.page-size-16k
+            raspberry-pi-5.display-vc4
+            ./config-txt.nix
+          ];
+        })
+        disko.nixosModules.disko
+        ./disko-usb-btrfs.nix
+        {
+          boot.tmp.useTmpfs = true;
+        }
+        ./configuration.nix
+      ];
+    };
   };
 }
