@@ -3,6 +3,8 @@
   lib,
   ...
 }: let
+  device = config.diskoDevice or "/dev/sda";
+
   firmwarePartition = lib.recursiveUpdate {
     # label = "FIRMWARE";
     priority = 1;
@@ -49,116 +51,125 @@
     };
   };
 in {
-  # https://nixos.wiki/wiki/Btrfs#Scrubbing
-  services.btrfs.autoScrub = {
-    enable = true;
-    interval = "monthly";
-    fileSystems = ["/"];
+  options.diskoDevice = lib.mkOption {
+    type = lib.types.str;
+    default = "/dev/sda";
+    example = "/dev/mmcblk0";
+    description = "Block device for the main disk (overridable for SD card or USB).";
   };
 
-  fileSystems = {
-    # mount early enough in the boot process so no logs will be lost
-    "/var/log".neededForBoot = true;
-  };
+  config = {
+    # https://nixos.wiki/wiki/Btrfs#Scrubbing
+    services.btrfs.autoScrub = {
+      enable = true;
+      interval = "monthly";
+      fileSystems = ["/"];
+    };
 
-  disko.devices.disk.main = {
-    type = "disk";
-    device = "/dev/sda";
+    fileSystems = {
+      # mount early enough in the boot process so no logs will be lost
+      "/var/log".neededForBoot = true;
+    };
 
-    content = {
-      type = "gpt";
-      partitions = {
-        FIRMWARE = firmwarePartition {
-          label = "FIRMWARE";
-          content.mountpoint = "/boot/firmware";
-        };
+    disko.devices.disk.main = {
+      type = "disk";
+      device = device;
 
-        ESP = espPartition {
-          label = "ESP";
-          content.mountpoint = "/boot";
-        };
+      content = {
+        type = "gpt";
+        partitions = {
+          FIRMWARE = firmwarePartition {
+            label = "FIRMWARE";
+            content.mountpoint = "/boot/firmware";
+          };
 
-        system = {
-          type = "8305"; # Linux ARM64 root (/)
+          ESP = espPartition {
+            label = "ESP";
+            content.mountpoint = "/boot";
+          };
 
-          size = "100%";
-          content = {
-            type = "btrfs";
-            extraArgs = [
-              # "--label nixos"
-              "-f" # Override existing partition
-            ];
-            postCreateHook = let
-              thisBtrfs = config.disko.devices.disk.main.content.partitions.system.content;
-              device = thisBtrfs.device;
-              subvolumes = thisBtrfs.subvolumes;
+          system = {
+            type = "8305"; # Linux ARM64 root (/)
 
-              makeBlankSnapshot = btrfsMntPoint: subvol: let
-                subvolAbsPath = lib.strings.normalizePath "${btrfsMntPoint}/${subvol.name}";
-                dst = "${subvolAbsPath}-blank";
-                # NOTE: this one-liner has the same functionality (inspired by zfs hook)
-                # btrfs subvolume list -s mnt/rootfs | grep -E ' rootfs-blank$' || btrfs subvolume snapshot -r mnt/rootfs mnt/rootfs-blank
+            size = "100%";
+            content = {
+              type = "btrfs";
+              extraArgs = [
+                # "--label nixos"
+                "-f" # Override existing partition
+              ];
+              postCreateHook = let
+                thisBtrfs = config.disko.devices.disk.main.content.partitions.system.content;
+                device = thisBtrfs.device;
+                subvolumes = thisBtrfs.subvolumes;
+
+                makeBlankSnapshot = btrfsMntPoint: subvol: let
+                  subvolAbsPath = lib.strings.normalizePath "${btrfsMntPoint}/${subvol.name}";
+                  dst = "${subvolAbsPath}-blank";
+                  # NOTE: this one-liner has the same functionality (inspired by zfs hook)
+                  # btrfs subvolume list -s mnt/rootfs | grep -E ' rootfs-blank$' || btrfs subvolume snapshot -r mnt/rootfs mnt/rootfs-blank
+                in ''
+                  if ! btrfs subvolume show "${dst}" > /dev/null 2>&1; then
+                    btrfs subvolume snapshot -r "${subvolAbsPath}" "${dst}"
+                  fi
+                '';
+                # Mount top-level subvolume (/) with "subvol=/", without it
+                # the default subvolume will be mounted. They're the same in
+                # this case, though. So "subvol=/" isn't really necessary
               in ''
-                if ! btrfs subvolume show "${dst}" > /dev/null 2>&1; then
-                  btrfs subvolume snapshot -r "${subvolAbsPath}" "${dst}"
-                fi
+                MNTPOINT=$(mktemp -d)
+                mount ${device} "$MNTPOINT" -o subvol=/
+                trap 'umount $MNTPOINT; rm -rf $MNTPOINT' EXIT
+                ${makeBlankSnapshot "$MNTPOINT" subvolumes."/rootfs"}
               '';
-              # Mount top-level subvolume (/) with "subvol=/", without it
-              # the default subvolume will be mounted. They're the same in
-              # this case, though. So "subvol=/" isn't really necessary
-            in ''
-              MNTPOINT=$(mktemp -d)
-              mount ${device} "$MNTPOINT" -o subvol=/
-              trap 'umount $MNTPOINT; rm -rf $MNTPOINT' EXIT
-              ${makeBlankSnapshot "$MNTPOINT" subvolumes."/rootfs"}
-            '';
-            subvolumes = {
-              "/rootfs" = {
-                mountpoint = "/";
-                mountOptions = ["noatime"];
-              };
-              "/nix" = {
-                mountpoint = "/nix";
-                mountOptions = ["noatime"];
-              };
-              "/home" = {
-                mountpoint = "/home";
-                mountOptions = ["noatime"];
-              };
-              "/log" = {
-                mountpoint = "/var/log";
-                mountOptions = ["noatime"];
-              };
-              "/swap" = {
-                mountpoint = "/.swapvol";
-                swap."swapfile" = {
-                  size = "8G";
-                  priority = 3; # (higher number -> higher priority)
-                  # to be used after zswap (set zramSwap.priority > this priority),
-                  # but before "hibernation" swap
-                  # https://github.com/nix-community/disko/issues/651
+              subvolumes = {
+                "/rootfs" = {
+                  mountpoint = "/";
+                  mountOptions = ["noatime"];
+                };
+                "/nix" = {
+                  mountpoint = "/nix";
+                  mountOptions = ["noatime"];
+                };
+                "/home" = {
+                  mountpoint = "/home";
+                  mountOptions = ["noatime"];
+                };
+                "/log" = {
+                  mountpoint = "/var/log";
+                  mountOptions = ["noatime"];
+                };
+                "/swap" = {
+                  mountpoint = "/.swapvol";
+                  swap."swapfile" = {
+                    size = "8G";
+                    priority = 3; # (higher number -> higher priority)
+                    # to be used after zswap (set zramSwap.priority > this priority),
+                    # but before "hibernation" swap
+                    # https://github.com/nix-community/disko/issues/651
+                  };
                 };
               };
             };
-          };
-        }; # system
+          }; # system
 
-        swap = {
-          type = "8200"; # Linux swap
+          swap = {
+            type = "8200"; # Linux swap
 
-          size = "9G"; # RAM + 1GB
-          content = {
-            type = "swap";
-            resumeDevice = true; # "hibernation" swap
-            # zram's swap will be used first, and this one only
-            # used when the system is under pressure enough that zram and
-            # "regular" swap above didn't work
-            # https://github.com/systemd/systemd/issues/16708#issuecomment-1632592375
-            # (set zramSwap.priority > btrfs' .swapvol priority > this priority)
-            priority = 2;
+            size = "9G"; # RAM + 1GB
+            content = {
+              type = "swap";
+              resumeDevice = true; # "hibernation" swap
+              # zram's swap will be used first, and this one only
+              # used when the system is under pressure enough that zram and
+              # "regular" swap above didn't work
+              # https://github.com/systemd/systemd/issues/16708#issuecomment-1632592375
+              # (set zramSwap.priority > btrfs' .swapvol priority > this priority)
+              priority = 2;
+            };
           };
         };
       };
-    };
-  }; # disko.devices.disk.main
+    }; # disko.devices.disk.main
+  };
 }

@@ -16,6 +16,21 @@
         "type": "github"
       }
     },
+    "black-terminal": {
+      "locked": {
+        "lastModified": 1771243634,
+        "narHash": "sha256-RfIWsZ/6ZpSfTvnYxnueMJWrKeJXd4zznSutMYwz7pY=",
+        "owner": "luisnquin",
+        "repo": "black-terminal",
+        "rev": "512c09372abd228f22e37130b87931b9cea7a86d",
+        "type": "github"
+      },
+      "original": {
+        "owner": "luisnquin",
+        "repo": "black-terminal",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -48,6 +63,26 @@
       "original": {
         "owner": "edolstra",
         "repo": "flake-compat",
+        "type": "github"
+      }
+    },
+    "home-manager": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1771683283,
+        "narHash": "sha256-WxAEkAbo8dP7qiyPM6VN4ZGAxfuBVlNBNPkrqkrXVEc=",
+        "owner": "nix-community",
+        "repo": "home-manager",
+        "rev": "c6ed3eab64d23520bcbb858aa53fe2b533725d4a",
+        "type": "github"
+      },
+      "original": {
+        "owner": "nix-community",
+        "repo": "home-manager",
         "type": "github"
       }
     },
@@ -179,7 +214,9 @@
     },
     "root": {
       "inputs": {
+        "black-terminal": "black-terminal",
         "disko": "disko",
+        "home-manager": "home-manager",
         "niri": "niri",
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixpkgs": "nixpkgs"
