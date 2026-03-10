@@ -66,22 +66,6 @@
         "type": "github"
       }
     },
-    "goodtft-lcd-show": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1763705066,
-        "narHash": "sha256-nVIlPtgrlhweRqzapu/Xth4qE6+YXQmKjgS1qgNK1xI=",
-        "owner": "goodtft",
-        "repo": "LCD-show",
-        "rev": "3fdfac02b914a7597a8010ece5b7082b9f5836e8",
-        "type": "github"
-      },
-      "original": {
-        "owner": "goodtft",
-        "repo": "LCD-show",
-        "type": "github"
-      }
-    },
     "home-manager": {
       "inputs": {
         "nixpkgs": [
@@ -196,11 +180,11 @@
         "nixpkgs": "nixpkgs"
       },
       "locked": {
-        "lastModified": 1769297295,
-        "narHash": "sha256-WNI4AzwrYPeKzI/maEE+pRm8y+l9+zELkmVzMzOrOfY=",
+        "lastModified": 1771867771,
+        "narHash": "sha256-v4UIlzztrAll/NPjsi0xWa5+fWcI9A4p8MLonL9EUeg=",
         "owner": "nvmd",
         "repo": "nixos-raspberrypi",
-        "rev": "251861d8e7e4806e185a8e41e09b3ad1e6e088e6",
+        "rev": "6b30596bea9047a7cbb55cb58e6f8a3efa4012e2",
         "type": "github"
       },
       "original": {
@@ -246,7 +230,6 @@
       "inputs": {
         "black-terminal": "black-terminal",
         "disko": "disko",
-        "goodtft-lcd-show": "goodtft-lcd-show",
         "home-manager": "home-manager",
         "niri": "niri",
         "nixos-raspberrypi": "nixos-raspberrypi",
