@@ -21,7 +21,6 @@
   users.users.luisnquin = {
     isNormalUser = true;
     extraGroups = ["wheel" "networkmanager" "video"];
-    initialHashedPassword = "$6$j3B2bLq0vF/thiPG$KGjRVM0/Q.mSH2aHstkKSgE.bJPVZcUiHS0Crjhs1YpmCTYsonQ0jCINIL2DAKkNrdd/94rzqiQeXWkJiNdEX0";
     openssh.authorizedKeys.keys = [
       "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIIXW6vsDRgI/AiOdGnQOTyiz1uLFL0o66u0Ahcw9VWyd luis@quinones.pro"
     ];
