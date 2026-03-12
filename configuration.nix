@@ -38,6 +38,13 @@
     };
   };
 
+  services.openssh = {
+    enable = true;
+    settings = {
+      PasswordAuthentication = true;
+    };
+  };
+
   programs.niri = {
     enable = true;
     package = pkgs.niri;
