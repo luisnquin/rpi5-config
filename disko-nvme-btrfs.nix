@@ -13,39 +13,49 @@
               content = {
                 type = "filesystem";
                 format = "vfat";
-                mountpoint = "/boot";
+                mountpoint = "/boot/firmware";
                 mountOptions = ["umask=0077"];
               };
             };
+
+            swap = {
+              size = "4G";
+              content = {
+                type = "swap";
+              };
+            };
+
             root = {
               size = "100%";
               content = {
                 type = "btrfs";
                 extraArgs = ["-f"];
                 subvolumes = {
-                  "/root" = {
+                  "@root" = {
                     mountpoint = "/";
                     mountOptions = ["compress=zstd" "noatime"];
                   };
-                  "/home" = {
+
+                  "@home" = {
                     mountpoint = "/home";
                     mountOptions = ["compress=zstd" "noatime"];
                   };
-                  "/nix" = {
+
+                  "@nix" = {
                     mountpoint = "/nix";
                     mountOptions = ["compress=zstd" "noatime"];
                   };
-                  "/log" = {
+
+                  "@log" = {
                     mountpoint = "/var/log";
                     mountOptions = ["compress=zstd" "noatime"];
                   };
+
+                  "@var" = {
+                    mountpoint = "/var";
+                    mountOptions = ["compress=zstd" "noatime"];
+                  };
                 };
-              };
-            };
-            swap = {
-              size = "4G";
-              content = {
-                type = "swap";
               };
             };
           };
