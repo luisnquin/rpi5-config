@@ -42,13 +42,10 @@
       specialArgs = inputs // {inherit inputs;};
       modules = [
         disko.nixosModules.disko
-        ./disko-usb-btrfs.nix
+        ./disko-nvme-btrfs.nix
         home-manager.nixosModules.default
         {
           imports = with nixos-raspberrypi.nixosModules; [
-            nixos-raspberrypi.lib.inject-overlays
-            nixos-raspberrypi.lib.inject-overlays-global
-            trusted-nix-caches
             raspberry-pi-5.base
             raspberry-pi-5.page-size-16k
             raspberry-pi-5.display-vc4
