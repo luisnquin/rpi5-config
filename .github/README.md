@@ -16,3 +16,9 @@ $ nix run nixpkgs#nixos-anywhere -- --flake .#ryx root@<address>
 ```
 
 After those steps  you should connect via SSH and set up your password.
+
+## Rebuild
+
+```sh
+$ nixos-rebuild switch --flake .#ryx --target-host root@<address>
+```
