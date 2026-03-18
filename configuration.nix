@@ -18,6 +18,8 @@
   #   config.boot.kernelPackages.kernel.version
   # ];
 
+  console.keyMap = "es";
+
   users.users.luisnquin = {
     isNormalUser = true;
     extraGroups = ["wheel" "networkmanager" "video"];
