@@ -11,7 +11,7 @@ $ zstd -dc ./result/sd-image/*.img.zst | sudo dd of=/dev/sda bs=4M status=progre
 # move SD to RPI5, power on, connect via ethernet
 $ ip address show
 # run using the shown address
-$ nix run nixpkgs#nixos-anywhere -- --flake .#ryx root@<address>
+$ nix run nixpkgs#nixos-anywhere -- --flake .#chimera root@<address>
 # wait for install, then disconnect, remove SD and power on again
 ```
 
@@ -20,5 +20,5 @@ After those steps  you should connect via SSH and set up your password.
 ## Rebuild
 
 ```sh
-$ nixos-rebuild switch --flake .#ryx --target-host root@<address>
+$ nixos-rebuild switch --flake .#chimera --target-host root@<address>
 ```

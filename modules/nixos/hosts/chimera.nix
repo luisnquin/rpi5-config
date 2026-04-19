@@ -1,5 +1,5 @@
 {inputs, ...}: {
-  flake.modules.nixos.ryx = {
+  flake.modules.nixos.chimera = {
     imports = with inputs.self.modules.nixos; [
       base
       nvmeBtrfs

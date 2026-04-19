@@ -56,7 +56,7 @@
       config = {
         systems = ["aarch64-linux"];
 
-        flake.nixosConfigurations.ryx = nixos-raspberrypi.lib.nixosSystem {
+        flake.nixosConfigurations.chimera = nixos-raspberrypi.lib.nixosSystem {
           specialArgs = inputs // {inherit inputs;};
           modules = [
             disko.nixosModules.disko
@@ -72,7 +72,7 @@
                 ];
               };
             }
-            self.modules.nixos.ryx
+            self.modules.nixos.chimera
           ];
         };
       };
