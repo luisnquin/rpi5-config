@@ -1,0 +1,16 @@
+{...}: {
+  flake.modules.nixos.fail2ban = {
+    services.fail2ban = {
+      enable = true;
+      maxretry = 5;
+      bantime = "24h";
+      bantime-increment = {
+        enable = true;
+        formula = "ban.Time * math.exp(float(ban.Count+1)*banFactor)/math.exp(1*banFactor)";
+        maxtime = "192h";
+        overalljails = true;
+      };
+      jails.sshd.settings.port = "998";
+    };
+  };
+}

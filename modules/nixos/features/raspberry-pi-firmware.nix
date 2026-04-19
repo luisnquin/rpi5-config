@@ -1,5 +1,5 @@
-{lib, ...}: {
-  flake.modules.nixos.raspberryPiFirmware = {
+{...}: {
+  flake.modules.nixos.raspberryPiFirmware = {lib, ...}: {
     hardware.raspberry-pi.config = {
       all = {
         options = {

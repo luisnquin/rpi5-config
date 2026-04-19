@@ -4,7 +4,7 @@
       avahi
       boot
       console
-      openssh
+      remoteAccess
       security
       system
       udev
