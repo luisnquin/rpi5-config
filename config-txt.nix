@@ -1,4 +1,4 @@
-{ lib, ... }: {
+{lib, ...}: {
   hardware.raspberry-pi.config = {
     all = {
       # [all] conditional filter, https://www.raspberrypi.com/documentation/computers/config_txt.html#conditional-filters

@@ -12,6 +12,7 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    flake-parts.url = "github:hercules-ci/flake-parts";
     black-terminal.url = "github:luisnquin/black-terminal";
     niri = {
       url = "github:sodiboo/niri-flake";
@@ -32,40 +33,44 @@
   };
 
   outputs = inputs @ {
+    flake-parts,
     nixos-raspberrypi,
     black-terminal,
     home-manager,
     disko,
     ...
-  }: {
-    nixosConfigurations.ryx = nixos-raspberrypi.lib.nixosSystem {
-      specialArgs = inputs // {inherit inputs;};
-      modules = [
-        disko.nixosModules.disko
-        ./disko-nvme-btrfs.nix
-        home-manager.nixosModules.default
-        {
-          imports = with nixos-raspberrypi.nixosModules; [
-            raspberry-pi-5.base
-            raspberry-pi-5.page-size-16k
-            raspberry-pi-5.display-vc4
-            ./config-txt.nix
-          ];
+  }:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = ["aarch64-linux"];
 
-          boot.tmp.useTmpfs = true;
-
-          home-manager.useGlobalPkgs = true;
-          home-manager.useUserPackages = true;
-          home-manager.extraSpecialArgs = {inherit inputs;};
-          home-manager.users.luisnquin = {
-            imports = [
-              black-terminal.homeModules.default
-              ./home.nix
+      flake.nixosConfigurations.ryx = nixos-raspberrypi.lib.nixosSystem {
+        specialArgs = inputs // {inherit inputs;};
+        modules = [
+          disko.nixosModules.disko
+          ./disko-nvme-btrfs.nix
+          home-manager.nixosModules.default
+          {
+            imports = with nixos-raspberrypi.nixosModules; [
+              raspberry-pi-5.base
+              raspberry-pi-5.page-size-16k
+              raspberry-pi-5.display-vc4
+              ./config-txt.nix
             ];
-          };
-        }
-        ./configuration.nix
-      ];
+
+            boot.tmp.useTmpfs = true;
+
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.extraSpecialArgs = {inherit inputs;};
+            home-manager.users.luisnquin = {
+              imports = [
+                black-terminal.homeModules.default
+                ./home.nix
+              ];
+            };
+          }
+          ./configuration.nix
+        ];
+      };
     };
-  };
 }
