@@ -14,13 +14,6 @@
     };
     flake-parts.url = "github:hercules-ci/flake-parts";
     black-terminal.url = "github:luisnquin/black-terminal";
-    niri = {
-      url = "github:sodiboo/niri-flake";
-      inputs = {
-        nixpkgs.follows = "nixpkgs";
-        nixpkgs-stable.follows = "nixpkgs";
-      };
-    };
   };
 
   nixConfig = {

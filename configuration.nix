@@ -1,10 +1,4 @@
-{
-  inputs,
-  pkgs,
-  ...
-}: {
-  nixpkgs.overlays = [inputs.niri.overlays.niri];
-
+{...}: {
   system.stateVersion = "26.05";
   networking.hostName = "ryx";
 
@@ -48,23 +42,11 @@
     sudo.enable = true;
   };
 
-  services.greetd = {
-    enable = true;
-    settings.default_session = {
-      command = ''${pkgs.greetd}/bin/agreety --cmd ${pkgs.lib.getExe pkgs.niri}'';
-    };
-  };
-
   services.openssh = {
     enable = true;
     settings = {
       PasswordAuthentication = true;
     };
-  };
-
-  programs.niri = {
-    enable = true;
-    package = pkgs.niri;
   };
 
   time.timeZone = "America/New_York";

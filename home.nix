@@ -19,7 +19,6 @@
         email = "luis@quinones.pro";
       };
     };
-    ghostty.enable = true;
     lazygit.enable = true;
     macchina.enable = true;
     magic-wormhole.enable = true;
@@ -28,8 +27,4 @@
     zoxide.enable = true;
     zsh.enable = true;
   };
-
-  imports = [
-    ./desktop.nix
-  ];
 }
