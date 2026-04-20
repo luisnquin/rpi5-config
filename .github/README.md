@@ -12,6 +12,7 @@ $ zstd -dc ./result/sd-image/*.img.zst | sudo dd of=/dev/sda bs=4M status=progre
 $ nix run nixpkgs#nixos-anywhere -- --no-substitute-on-destination --build-on local --flake .#chimera --target-host root@<address>
 
 # wait for install, then disconnect, remove SD and power on again
+$ sudo tailscale up --ssh
 ```
 
 After those steps  you should connect via SSH and set up your password.
