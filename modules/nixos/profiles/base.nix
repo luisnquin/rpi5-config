@@ -4,6 +4,7 @@
       avahi
       boot
       console
+      nix
       remoteAccess
       security
       system
