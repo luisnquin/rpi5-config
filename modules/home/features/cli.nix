@@ -10,7 +10,15 @@
       macchina.enable = true;
       magic-wormhole.enable = true;
       starship.enable = true;
-      tmux.enable = true;
+      tmux = {
+        enable = true;
+        status = {
+          ssh.enable = false;
+          gpg.enable = false;
+          lsyncd.enable = false;
+          gitmux.enable = false;
+        };
+      };
       zoxide.enable = true;
       zsh.enable = true;
     };
