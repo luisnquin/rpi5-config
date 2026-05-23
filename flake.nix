@@ -60,6 +60,7 @@
           specialArgs = inputs // {inherit inputs;};
           modules = [
             disko.nixosModules.disko
+            black-terminal.nixosModules.default
             home-manager.nixosModules.default
             {
               home-manager.useGlobalPkgs = true;
