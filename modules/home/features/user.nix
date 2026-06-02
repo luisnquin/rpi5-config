@@ -3,7 +3,7 @@
     home = {
       username = "luisnquin";
       homeDirectory = "/home/luisnquin";
-      stateVersion = "26.05";
+      stateVersion = "25.11";
       enableNixpkgsReleaseCheck = true;
     };
   };
