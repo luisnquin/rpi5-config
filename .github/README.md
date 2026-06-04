@@ -9,7 +9,7 @@ $ nix build .#installerImages.rpi5
 # insert SD card
 $ zstd -dc ./result/sd-image/*.img.zst | sudo dd of=/dev/sda bs=4M status=progress conv=fsync
 # move SD to RPI5, power on, connect via ethernet
-$ nix run nixpkgs#nixos-anywhere -- --no-substitute-on-destination --build-on local --flake .#chimera --target-host root@<address>
+$ nix run nixpkgs#nixos-anywhere -- --no-substitute-on-destination --build-on local --flake .#chimera --target-host root@nixos-installer.local
 
 # wait for install, then disconnect, remove SD and power on again
 $ sudo tailscale up --ssh
