@@ -14,6 +14,10 @@
     };
     flake-parts.url = "github:hercules-ci/flake-parts";
     black-terminal.url = "github:luisnquin/black-terminal";
+    sops-nix = {
+      url = "github:Mic92/sops-nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = {
