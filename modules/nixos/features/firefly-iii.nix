@@ -1,36 +1,34 @@
 {
-  flake.modules.nixos.fireflyIii = {pkgs, ...}: {
+  flake.modules.nixos.fireflyIii = {
+    pkgs,
+    lib,
+    ...
+  }: {
+    services.postgresql = {
+      enable = true;
+      enableTCPIP = true;
+      ensureDatabases = ["firefly"];
+      ensureUsers = [
+        {
+          name = "firefly";
+          ensureDBOwnership = true;
+        }
+      ];
+      # Allow the podman default bridge subnet to connect as the firefly role.
+      authentication = lib.mkAfter ''
+        host firefly firefly 10.88.0.0/16 scram-sha-256
+      '';
+    };
+
     virtualisation.podman.enable = true;
     virtualisation.oci-containers = {
       backend = "podman";
       containers = {
-        firefly-iii-db = {
-          image = "docker.io/library/mariadb:11.4.12@sha256:1b46b73d4b629022dfa29e6db3bb0d63b5df714fc3bfbe5057d63d76d8f6054b";
-          autoStart = true;
-          environment = {
-            MARIADB_DATABASE = "firefly";
-            MARIADB_USER = "firefly";
-            MARIADB_RANDOM_ROOT_PASSWORD = "yes";
-          };
-          environmentFiles = ["/var/lib/firefly-iii/secrets/db.env"];
-          volumes = ["/var/lib/firefly-iii/db:/var/lib/mysql"];
-          extraOptions = [
-            "--network=firefly-iii"
-            "--network-alias=firefly-iii-db"
-            "--health-cmd=healthcheck.sh --connect --innodb_initialized"
-            "--health-interval=10s"
-            "--health-timeout=5s"
-            "--health-retries=6"
-            "--health-start-period=30s"
-          ];
-        };
-
         firefly-iii = {
           # Firefly rebuilds version-X.Y.Z tags in place on base-image patches,
           # so the digest is what makes this reproducible.
           image = "docker.io/fireflyiii/core:version-6.6.3@sha256:4d63328dbc7c60ef5a8269bb2ee89f120b28f88eb0395e4211e23f93fd79337f";
           autoStart = true;
-          dependsOn = ["firefly-iii-db"];
           environment = {
             APP_ENV = "production";
             APP_DEBUG = "false";
@@ -43,15 +41,14 @@
             LOG_CHANNEL = "stdout";
             APP_LOG_LEVEL = "notice";
             AUDIT_LOG_LEVEL = "emergency";
-            DB_CONNECTION = "mysql";
-            DB_HOST = "firefly-iii-db";
-            DB_PORT = "3306";
+            DB_CONNECTION = "pgsql";
+            DB_HOST = "host.containers.internal";
+            DB_PORT = "5432";
             DB_DATABASE = "firefly";
             DB_USERNAME = "firefly";
             CACHE_DRIVER = "file";
             SESSION_DRIVER = "file";
             MAIL_MAILER = "log";
-            DKR_CHECK_SQLITE = "false";
           };
           environmentFiles = ["/var/lib/firefly-iii/secrets/app.env"];
           ports = ["8080:8080"];
@@ -59,6 +56,7 @@
           extraOptions = [
             "--network=firefly-iii"
             "--network-alias=firefly-iii"
+            "--add-host=host.containers.internal:host-gateway"
           ];
         };
 
@@ -78,9 +76,7 @@
             TRUSTED_PROXIES = "**";
           };
           ports = ["8081:8080"];
-          extraOptions = [
-            "--network=firefly-iii"
-          ];
+          extraOptions = ["--network=firefly-iii"];
         };
       };
     };
@@ -88,20 +84,13 @@
     systemd.tmpfiles.rules = [
       "d /var/lib/firefly-iii 0700 root root -"
       "d /var/lib/firefly-iii/secrets 0700 root root -"
-      "d /var/lib/firefly-iii/db 0700 999 999 -"
       "d /var/lib/firefly-iii/upload 0750 33 33 -"
     ];
 
     systemd.services.firefly-iii-secrets = {
       wantedBy = ["multi-user.target"];
-      requiredBy = [
-        "podman-firefly-iii.service"
-        "podman-firefly-iii-db.service"
-      ];
-      before = [
-        "podman-firefly-iii.service"
-        "podman-firefly-iii-db.service"
-      ];
+      requiredBy = ["podman-firefly-iii.service" "firefly-iii-db-init.service"];
+      before = ["podman-firefly-iii.service" "firefly-iii-db-init.service"];
       path = [pkgs.coreutils];
       serviceConfig = {
         Type = "oneshot";
@@ -130,8 +119,30 @@
             printf 'STATIC_CRON_TOKEN=%s\n' "$(gen 32)"
           } > "$secdir/app.env"
 
-          printf 'MARIADB_PASSWORD=%s\n' "$db_password" > "$secdir/db.env"
+          install -m 0400 -o postgres /dev/null "$secdir/db_password"
+          printf '%s' "$db_password" > "$secdir/db_password"
         fi
+      '';
+    };
+
+    # Sets the PostgreSQL password for the firefly role from the on-device
+    # generated file. Runs as the postgres OS user so peer auth works over the
+    # local socket; the db_password file is owned by postgres (0400).
+    systemd.services.firefly-iii-db-init = {
+      wantedBy = ["multi-user.target"];
+      requiredBy = ["podman-firefly-iii.service"];
+      before = ["podman-firefly-iii.service"];
+      after = ["postgresql.service" "firefly-iii-secrets.service"];
+      requires = ["postgresql.service" "firefly-iii-secrets.service"];
+      path = [pkgs.postgresql];
+      serviceConfig = {
+        Type = "oneshot";
+        RemainAfterExit = true;
+        User = "postgres";
+      };
+      script = ''
+        set -euo pipefail
+        psql -c "ALTER USER firefly PASSWORD '$(cat /var/lib/firefly-iii/secrets/db_password)'"
       '';
     };
 
@@ -139,12 +150,10 @@
       wantedBy = ["multi-user.target"];
       requiredBy = [
         "podman-firefly-iii.service"
-        "podman-firefly-iii-db.service"
         "podman-firefly-iii-importer.service"
       ];
       before = [
         "podman-firefly-iii.service"
-        "podman-firefly-iii-db.service"
         "podman-firefly-iii-importer.service"
       ];
       path = [pkgs.podman];
