@@ -2,3 +2,5 @@
 
 # upstream source clone kept only as a local reference, never committed
 /firefly-iii/
+
+.claude/
