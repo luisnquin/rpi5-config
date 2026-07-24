@@ -12,6 +12,7 @@
       starship.enable = true;
       tmux = {
         enable = true;
+        autoStart = true;
         status = {
           ssh.enable = false;
           gpg.enable = false;
