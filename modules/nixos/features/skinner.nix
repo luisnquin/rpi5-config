@@ -93,7 +93,7 @@
       wantedBy = ["multi-user.target"];
       wants = ["network-online.target"];
       after = ["network-online.target" "tailscaled.service"];
-      path = [skinner phone config.nix.package] ++ (with pkgs; [android-tools bash coreutils curl git gnugrep jq openssh]);
+      path = [skinner phone config.nix.package] ++ (with pkgs; [android-tools bash coreutils curl git gnugrep jq openssh procps]);
       environment = {
         PHONE_AGENT = "skinner";
         GIT_CONFIG_GLOBAL = "/dev/null";
