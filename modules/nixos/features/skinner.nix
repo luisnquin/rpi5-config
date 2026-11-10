@@ -77,6 +77,9 @@
 
     age.secrets = lib.genAttrs ["pavlov-pin"] secret;
 
+    # Jobs run npm-shipped prebuilt binaries, such as argent's simulator-server.
+    programs.nix-ld.enable = true;
+
     environment.etc."skinner/config.json".text = builtins.toJSON settings;
     environment.systemPackages = [skinner phone pkgs.android-tools];
 
