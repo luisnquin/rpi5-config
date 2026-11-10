@@ -5,20 +5,22 @@
       nssmdns4 = true;
       openFirewall = true;
 
-      publish = {
-        enable = true;
-        addresses = true;
-        workstation = true;
-        userServices = false;
-      };
+      settings = {
+        publish = {
+          disable-publishing = false;
+          disable-user-service-publishing = true;
+          publish-addresses = true;
+          publish-workstation = true;
+        };
 
-      denyInterfaces = [
-        "br-*"
-        "docker0"
-        "tailscale0"
-        "veth*"
-        "virbr*"
-      ];
+        server.deny-interfaces = [
+          "br-*"
+          "docker0"
+          "tailscale0"
+          "veth*"
+          "virbr*"
+        ];
+      };
 
       extraServiceFiles.ssh = ''
         <?xml version="1.0" standalone='no'?>

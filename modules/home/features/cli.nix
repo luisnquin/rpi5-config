@@ -17,7 +17,7 @@
           ssh.enable = false;
           gpg.enable = false;
           lsyncd.enable = false;
-          gitmux.enable = false;
+          git.enable = false;
         };
       };
       zoxide.enable = true;
