@@ -18,6 +18,10 @@
     };
     flake-parts.url = "github:hercules-ci/flake-parts";
     black-terminal.url = "github:luisnquin/black-terminal";
+    nixos-config = {
+      url = "github:luisnquin/nixos-config";
+      flake = false;
+    };
     identity = {
       url = "github:luisnquin/luisnquin";
       inputs.nixpkgs.follows = "nixpkgs";

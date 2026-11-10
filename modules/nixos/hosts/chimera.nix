@@ -4,6 +4,7 @@
       base
       nvmeBtrfs
       raspberryPi5
+      skinner
       wifi
     ];
   };

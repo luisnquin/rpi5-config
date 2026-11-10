@@ -131,16 +131,32 @@
         ]
       },
       "locked": {
-        "lastModified": 1794315567,
-        "narHash": "sha256-mzOig/feu1280Yp+t4Xymw7YVPvikTSa60kp6gmIdc4=",
+        "lastModified": 1794324006,
+        "narHash": "sha256-PFzN9I6UkXWNHRbIHuK0tmzW/tYCls2brQ6L1BmDVzg=",
         "owner": "luisnquin",
         "repo": "luisnquin",
-        "rev": "1acdfbae011511266654f2ecdc0607baaec353e6",
+        "rev": "0c28328ceb6805a12078a1fb405c14fe4ca47c07",
         "type": "github"
       },
       "original": {
         "owner": "luisnquin",
         "repo": "luisnquin",
+        "type": "github"
+      }
+    },
+    "nixos-config": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1794234992,
+        "narHash": "sha256-DfkE1oqtbQ2D/u496eQJti2PjMuCw9TlQPbRAQlt4R4=",
+        "owner": "luisnquin",
+        "repo": "nixos-config",
+        "rev": "5231a58165ac9ccac04003ee70800674013e21d3",
+        "type": "github"
+      },
+      "original": {
+        "owner": "luisnquin",
+        "repo": "nixos-config",
         "type": "github"
       }
     },
@@ -247,6 +263,7 @@
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",
         "identity": "identity",
+        "nixos-config": "nixos-config",
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixpkgs": "nixpkgs_2"
       }
