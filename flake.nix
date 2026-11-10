@@ -4,7 +4,7 @@
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs?ref=nixos-unstable";
     home-manager = {
-      url = "github:nix-community/home-manager/release-26.05";
+      url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nixos-raspberrypi.url = "github:nvmd/nixos-raspberrypi/develop";
@@ -12,8 +12,16 @@
       url = "github:nix-community/disko";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    agenix = {
+      url = "github:ryantm/agenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     flake-parts.url = "github:hercules-ci/flake-parts";
     black-terminal.url = "github:luisnquin/black-terminal";
+    identity = {
+      url = "github:luisnquin/luisnquin";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = {
@@ -57,6 +65,7 @@
         systems = ["aarch64-linux"];
 
         flake.nixosConfigurations.chimera = nixos-raspberrypi.lib.nixosSystem {
+          inherit nixpkgs;
           specialArgs = inputs // {inherit inputs;};
           modules = [
             disko.nixosModules.disko
@@ -75,6 +84,12 @@
             }
             self.modules.nixos.chimera
           ];
+        };
+
+        flake.nixosConfigurations.installer = nixos-raspberrypi.lib.nixosInstaller {
+          inherit nixpkgs;
+          specialArgs = inputs // {inherit inputs;};
+          modules = [self.modules.nixos.installer];
         };
       };
     };
