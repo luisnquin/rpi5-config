@@ -79,6 +79,7 @@ const Pending = struct {
 const run_script =
     \\cd "$SKINNER_REPO_DIR" || exit 70
     \\if [ -n "${ANDROID_SERIAL:-}" ]; then
+    \\  trap 'adb shell input keyevent KEYCODE_SLEEP >/dev/null 2>&1' EXIT
     \\  start=$(adb shell date +%s | tr -d '\r')
     \\  if [ -n "${SKINNER_SETUP:-}" ]; then "$SKINNER_SETUP" || exit 75; fi
     \\fi
