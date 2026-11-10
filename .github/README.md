@@ -1,25 +1,26 @@
 # RPI5
 
-## Setup
+## Install
 
 ```sh
-$ git clone git@github.com:nvmd/nixos-raspberrypi.git && cd nixos-raspberrypi
-# append your public key to users.users.*.openssh.authorizedKeys.keys before building
-$ nix build .#installerImages.rpi5
-# insert SD card
-$ zstd -dc ./result/sd-image/*.img.zst | sudo dd of=/dev/sda bs=4M status=progress conv=fsync
-# move SD to RPI5, power on, connect via ethernet
-$ nix run nixpkgs#nixos-anywhere -- --no-substitute-on-destination --build-on local --flake .#chimera --target-host root@nixos-installer.local
-
-# wait for install, then disconnect, remove SD and power on again
-$ sudo tailscale up --ssh
+$ nix build .#nixosConfigurations.installer.config.system.build.sdImage
+$ zstd -dc result/sd-image/*.img.zst | sudo dd of=/dev/sdX bs=4M status=progress conv=fsync
+# boot the Pi from the SD with ethernet; root takes the keys in identity
+$ nix run nixpkgs#nixos-anywhere -- --flake .#chimera --build-on remote --target-host root@nixos-installer.local
 ```
 
-After those steps  you should connect via SSH and set up your password.
+nixos-anywhere wipes the NVMe (disko). The new host key breaks the wifi secret: put it in `secrets/secrets.nix` and in identity, then `agenix -r`.
 
 ## Rebuild
 
 ```sh
-# clue: tailscale
-$ nixos-rebuild switch --flake .#chimera --target-host root@chimera
+$ nixos-rebuild switch --flake .#chimera --build-host chimera --target-host chimera --sudo --ask-sudo-password
+```
+
+Builds on the Pi. The `chimera` host (port 998; 22 is endlessh) comes from nyx's ssh config.
+
+## Secrets
+
+```sh
+$ cd secrets && nix run github:ryantm/agenix -- -e wifi.env.age
 ```
