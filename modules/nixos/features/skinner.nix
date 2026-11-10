@@ -31,24 +31,28 @@
       adb shell settings put global hide_error_dialogs 1
     '';
 
-    ntfy = pkgs.writeShellScript "skinner-ntfy" ''
-      event=$(cat)
-      kind=$(printf '%s' "$event" | jq -r .event)
-      [ "$kind" = queued ] && exit 0
-      priority=default
-      case "$kind:$(printf '%s' "$event" | jq -r '.status // ""')" in
-        device.unreachable:* | report.failed:* | await.timeout:* | finished:failed | finished:error | finished:timeout | finished:unreachable) priority=high ;;
-      esac
-      printf '%s' "$event" \
-        | jq -r '[.repo, .job, .event, .status, .message] | map(select(.)) | join(" ")' \
-        | curl -fsS --max-time 10 -H "Title: skinner $(printf '%s' "$event" | jq -r '.run // "chimera"')" \
-          -H "Priority: $priority" -H "Tags: robot" --data-binary @- http://nyx:2586/skinner >/dev/null
-    '';
+    ntfy = lib.getExe (pkgs.writeShellApplication {
+      name = "skinner-ntfy";
+      runtimeInputs = [pkgs.curl pkgs.jq];
+      text = ''
+        event=$(cat)
+        kind=$(printf '%s' "$event" | jq -r .event)
+        [ "$kind" = queued ] && exit 0
+        priority=default
+        case "$kind:$(printf '%s' "$event" | jq -r '.status // ""')" in
+          device.unreachable:* | report.failed:* | await.timeout:* | finished:failed | finished:error | finished:timeout | finished:unreachable) priority=high ;;
+        esac
+        printf '%s' "$event" \
+          | jq -r '[.repo, .job, .event, .status, .message] | map(select(.)) | join(" ")' \
+          | curl -fsS --max-time 10 -H "Title: skinner $(printf '%s' "$event" | jq -r '.run // "chimera"')" \
+            -H "Priority: $priority" -H "Tags: robot" --data-binary @- http://nyx:2586/skinner >/dev/null
+      '';
+    });
 
     settings = {
       state = "/var/lib/skinner";
       keep = 200;
-      hooks = ["${ntfy}"];
+      hooks = [ntfy];
       hosts.nyx = "ssh -o BatchMode=yes -o ConnectTimeout=5 nyx true";
       devices.pavlov = {
         setup = "${pavlovSetup}";
@@ -82,7 +86,10 @@
       wants = ["network-online.target"];
       after = ["network-online.target" "tailscaled.service"];
       path = [skinner phone config.nix.package] ++ (with pkgs; [android-tools bash coreutils curl git gnugrep jq openssh]);
-      environment.PHONE_AGENT = "skinner";
+      environment = {
+        PHONE_AGENT = "skinner";
+        GIT_CONFIG_GLOBAL = "/dev/null";
+      };
       serviceConfig = {
         User = "luisnquin";
         ExecStart = "${lib.getExe skinner} daemon";
