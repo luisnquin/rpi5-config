@@ -16,7 +16,6 @@
     # pavlov also needs argent's devtools set to manual under App launch (system processes):
     # EMUI otherwise freezes that helper ~10s after it starts and every UI read hangs.
     pavlovSetup = pkgs.writeShellScript "pavlov-setup" ''
-      pavlov-unplug
       locked() { adb shell dumpsys window | grep -q 'isStatusBarKeyguard=true'; }
       adb shell input keyevent KEYCODE_WAKEUP
       sleep 1

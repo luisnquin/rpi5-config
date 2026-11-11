@@ -28,14 +28,12 @@
       '';
     };
 
-    # argent refuses to pick between pavlov's usb and wireless transports, so runs go wireless only.
-    pavlovUnplug = pkgs.writeShellScriptBin "pavlov-unplug" (power "0");
-
     pavlovCharge = pkgs.writeShellApplication {
       name = "pavlov-charge";
       runtimeInputs = [(pkgs.callPackage ../../../pkgs/skinner {}) phone pkgs.android-tools pkgs.bash pavlovRecover];
       text = ''
-        if [[ $(skinner status) == running* ]]; then exit; fi
+        if [[ $(skinner status) == running* ]]; then exec ${power "1"}; fi
+        trap 'phone release -t pavlov >/dev/null 2>&1' EXIT
 
         level=$(phone run -t pavlov -- adb shell dumpsys battery </dev/null | sed -n 's/^ *level: *//p' | tr -d '\r') || level=
         if [[ ! $level =~ ^[0-9]+$ ]]; then
@@ -56,7 +54,7 @@
 
     environment.systemPackages = [usbPower];
 
-    systemd.services.skinner.path = [pavlovRecover pavlovUnplug];
+    systemd.services.skinner.path = [pavlovRecover];
 
     security.sudo.extraRules = [
       {
@@ -72,7 +70,7 @@
 
     systemd.services.pavlov-charge = {
       description = "pavlov battery charge window";
-      environment.PHONE_AGENT = "skinner";
+      environment.PHONE_AGENT = "pavlov-charge";
       serviceConfig = {
         Type = "oneshot";
         User = "luisnquin";
