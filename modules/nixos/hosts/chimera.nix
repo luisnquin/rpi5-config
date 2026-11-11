@@ -4,6 +4,7 @@
       base
       farm
       nvmeBtrfs
+      pavlov
       raspberryPi5
       skinner
       wifi
