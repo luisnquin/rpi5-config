@@ -19,6 +19,7 @@ const Config = struct {
 
 const Device = struct {
     setup: []const u8 = "",
+    recover: []const u8 = "",
     env: Strings = .{},
 };
 
@@ -430,6 +431,7 @@ fn execute(c: *Ctx, id: []const u8, req: Request) void {
                 continue;
             }
             if (ready != 3) {
+                if (device.recover.len > 0) _ = sh(c, device.recover, &env, log);
                 _ = spawn(c, &.{ "phone", "device", "connect", dev }, &env, log);
                 if (device_ready(c, dev, &env, log) == 0) break;
             }
