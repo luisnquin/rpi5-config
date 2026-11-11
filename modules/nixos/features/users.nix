@@ -7,6 +7,7 @@
 
       luisnquin = {
         isNormalUser = true;
+        linger = true;
         shell = pkgs.zsh;
         hashedPassword = "$6$djOTUxEpFIXIRtd3$RfBMFRLcgsaAWSRg.sHCQv87WRX3jE0gRpinMJwpu7cBk1HT2EaOzhGC829jlRVV7v4lMvMO99xmzAJWL/Exg.";
         extraGroups = ["wheel" "networkmanager" "video"];

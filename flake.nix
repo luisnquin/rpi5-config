@@ -22,6 +22,11 @@
       url = "github:luisnquin/nixos-config";
       flake = false;
     };
+    zen-browser-flake = {
+      url = "github:0xc000022070/zen-browser-flake";
+      inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
+    };
     identity = {
       url = "github:luisnquin/luisnquin";
       inputs.nixpkgs.follows = "nixpkgs";
