@@ -417,6 +417,7 @@ fn execute(c: *Ctx, id: []const u8, req: Request) void {
     if (job.device) |dev| {
         const device = c.cfg.devices.map.get(dev) orelse Device{};
         env.put("SKINNER_DEVICE", dev) catch oom();
+        defer _ = spawn(c, &.{ "phone", "release", "-t", dev }, &env, log);
         if (device.setup.len > 0) env.put("SKINNER_SETUP", device.setup) catch oom();
         secrets(c, &env, device.env);
         const deadline = c.now() + job.timeout;
