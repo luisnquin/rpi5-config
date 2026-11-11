@@ -15,29 +15,36 @@
       '';
     };
 
+    power = state: "${config.security.wrapperDir}/sudo ${lib.getExe usbPower} ${state}";
+    phone = pkgs.callPackage "${inputs.nixos-config}/pkgs/phone" {};
+
+    pavlovRecover = pkgs.writeShellApplication {
+      name = "pavlov-recover";
+      runtimeInputs = [phone pkgs.android-tools pkgs.bash];
+      text = ''
+        ${power "1"}
+        timeout 60 adb wait-for-usb-device
+        phone device pin pavlov
+      '';
+    };
+
+    # argent refuses to pick between pavlov's usb and wireless transports, so runs go wireless only.
+    pavlovUnplug = pkgs.writeShellScriptBin "pavlov-unplug" (power "0");
+
     pavlovCharge = pkgs.writeShellApplication {
       name = "pavlov-charge";
-      runtimeInputs = [
-        (pkgs.callPackage ../../../pkgs/skinner {})
-        (pkgs.callPackage "${inputs.nixos-config}/pkgs/phone" {})
-        pkgs.android-tools
-      ];
+      runtimeInputs = [(pkgs.callPackage ../../../pkgs/skinner {}) phone pkgs.android-tools pkgs.bash pavlovRecover];
       text = ''
-        power() { ${config.security.wrapperDir}/sudo ${lib.getExe usbPower} "$1"; }
-
-        if [[ $(skinner status) == running* ]]; then
-          power 1
-          exit
-        fi
+        if [[ $(skinner status) == running* ]]; then exit; fi
 
         level=$(phone run -t pavlov -- adb shell dumpsys battery </dev/null | sed -n 's/^ *level: *//p' | tr -d '\r') || level=
         if [[ ! $level =~ ^[0-9]+$ ]]; then
-          echo "pavlov-charge: no battery level, charging" >&2
-          power 1
+          echo "pavlov-charge: no battery level, recovering" >&2
+          pavlov-recover
         elif ((level >= 80)); then
-          power 0
+          ${power "0"}
         elif ((level <= 40)); then
-          power 1
+          ${power "1"}
         fi
       '';
     };
@@ -48,6 +55,8 @@
     '';
 
     environment.systemPackages = [usbPower];
+
+    systemd.services.skinner.path = [pavlovRecover pavlovUnplug];
 
     security.sudo.extraRules = [
       {

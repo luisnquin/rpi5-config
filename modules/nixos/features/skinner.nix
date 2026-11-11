@@ -16,6 +16,7 @@
     # pavlov also needs argent's devtools set to manual under App launch (system processes):
     # EMUI otherwise freezes that helper ~10s after it starts and every UI read hangs.
     pavlovSetup = pkgs.writeShellScript "pavlov-setup" ''
+      pavlov-unplug
       locked() { adb shell dumpsys window | grep -q 'isStatusBarKeyguard=true'; }
       adb shell input keyevent KEYCODE_WAKEUP
       sleep 1
@@ -27,9 +28,11 @@
         sleep 2
         if locked; then
           echo "pavlov-setup: keyguard still up after PIN" >&2
+          adb exec-out screencap -p >"$SKINNER_RUN_DIR/keyguard.png"
           exit 1
         fi
       fi
+      adb shell pm disable-user --user 0 com.huawei.android.hwouc >/dev/null
       adb shell settings put global hide_error_dialogs 1
       for scale in window_animation_scale transition_animation_scale animator_duration_scale; do
         adb shell settings put global "$scale" 0
@@ -61,6 +64,7 @@
       hosts.nyx = "ssh -o BatchMode=yes -o ConnectTimeout=5 nyx true";
       devices.pavlov = {
         setup = "${pavlovSetup}";
+        recover = "pavlov-recover";
         env.PAVLOV_PIN = paths.pavlov-pin.path;
       };
       repos.sevastopol = {
