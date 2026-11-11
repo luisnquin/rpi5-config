@@ -544,7 +544,7 @@ fn daemon(c: *Ctx) !void {
                 while (jt.next()) |j| {
                     const spec = j.value_ptr.schedule orelse continue;
                     const s = cron.Schedule.parse(spec) catch continue;
-                    if (s.matches(m * 60)) _ = enqueue(c, .{ .repo = name, .job = j.key_ptr.*, .trigger = "schedule" }) catch {};
+                    if (s.matches(cron.local(m * 60))) _ = enqueue(c, .{ .repo = name, .job = j.key_ptr.*, .trigger = "schedule" }) catch {};
                 }
             }
         }

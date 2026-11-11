@@ -78,6 +78,15 @@ fn field(text: []const u8, lo: u6, hi: u6) !u64 {
     return set;
 }
 
+const CTm = extern struct { sec: c_int, min: c_int, hour: c_int, mday: c_int, mon: c_int, year: c_int, wday: c_int, yday: c_int, isdst: c_int, gmtoff: c_long, zone: ?[*:0]const u8 };
+extern "c" fn localtime_r(t: *const i64, out: *CTm) ?*CTm;
+
+/// Shifts a UTC epoch into the host's local wall clock, so schedules read like system cron.
+pub fn local(epoch: i64) i64 {
+    var t: CTm = undefined;
+    return epoch + if (localtime_r(&epoch, &t)) |r| r.gmtoff else 0;
+}
+
 pub const Tm = struct {
     year: u16,
     month: u6,
@@ -125,6 +134,16 @@ test "matches" {
     try std.testing.expect(either.matches(1762732800));
     try std.testing.expect(either.matches(1761955200));
     try std.testing.expect(!either.matches(1762300800));
+}
+
+test "local" {
+    const c = struct {
+        extern "c" fn setenv(name: [*:0]const u8, value: [*:0]const u8, overwrite: c_int) c_int;
+        extern "c" fn tzset() void;
+    };
+    _ = c.setenv("TZ", "CST6", 1);
+    c.tzset();
+    try std.testing.expectEqual(@as(i64, 1762754400 - 6 * 3600), local(1762754400));
 }
 
 test "tm" {

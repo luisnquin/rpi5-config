@@ -5,6 +5,7 @@ pub fn build(b: *std.Build) void {
         .root_source_file = b.path("src/main.zig"),
         .target = b.standardTargetOptions(.{}),
         .optimize = b.standardOptimizeOption(.{}),
+        .link_libc = true,
     });
     b.installArtifact(b.addExecutable(.{ .name = "skinner", .root_module = mod }));
     const tests = b.addRunArtifact(b.addTest(.{ .root_module = mod }));
