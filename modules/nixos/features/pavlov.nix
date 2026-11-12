@@ -32,17 +32,26 @@
       name = "pavlov-charge";
       runtimeInputs = [(pkgs.callPackage ../../../pkgs/skinner {}) phone pkgs.android-tools pkgs.bash pavlovRecover];
       text = ''
-        if [[ $(skinner status) == running* ]]; then exec ${power "1"}; fi
+        if [[ $(skinner status) == running* ]]; then
+          echo "action=on reason=skinner-running"
+          exec ${power "1"}
+        fi
         trap 'phone release -t pavlov >/dev/null 2>&1' EXIT
 
-        level=$(phone run -t pavlov -- adb shell dumpsys battery </dev/null | sed -n 's/^ *level: *//p' | tr -d '\r') || level=
+        battery=$(phone run -t pavlov -- adb shell dumpsys battery </dev/null | tr -d '\r') || battery=
+        level=$(sed -n 's/^ *level: *//p' <<<"$battery")
+        state="level=''${level:-?} usb_powered=$(sed -n 's/^ *USB powered: *//p' <<<"$battery") transports=$(adb devices | grep -c 'device$')"
         if [[ ! $level =~ ^[0-9]+$ ]]; then
-          echo "pavlov-charge: no battery level, recovering" >&2
+          echo "$state action=recover"
           pavlov-recover
         elif ((level >= 80)); then
+          echo "$state action=off"
           ${power "0"}
         elif ((level <= 40)); then
+          echo "$state action=on"
           ${power "1"}
+        else
+          echo "$state action=hold"
         fi
       '';
     };
