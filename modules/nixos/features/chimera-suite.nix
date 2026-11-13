@@ -22,7 +22,7 @@
           | jq -r '[.type, .repo // .project, .version // .title, .culprit] | map(select(. and . != "")) | join(" ")' \
           | curl -fsS --max-time 10 -H "Title: chimera $(printf '%s' "$event" | jq -r .org)" \
             -H "Priority: $priority" -H "Click: $(printf '%s' "$event" | jq -r .url)" \
-            --data-binary @- http://nyx:2586/chimera >/dev/null
+            --data-binary @- http://nyx:2586/notifications >/dev/null
       '';
     };
 
