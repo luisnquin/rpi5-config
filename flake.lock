@@ -58,11 +58,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1794586810,
-        "narHash": "sha256-2m158VPhkJR3WwW7Cp+ky+S4zBObvFD4IhqE3GpRSYc=",
+        "lastModified": 1794589826,
+        "narHash": "sha256-ssMjDw6GFesjO4oqtusCaE1diEUv7UmBYJeMLSZYEcs=",
         "ref": "refs/heads/main",
-        "rev": "a881e6ba2136905735fad766a1df995af9300d31",
-        "revCount": 8,
+        "rev": "719a7d99e2c442cbfe9d50bc018d5d8bdffb8b4a",
+        "revCount": 11,
         "type": "git",
         "url": "ssh://git@chimera/srv/git/0xc000022070/chimera.git"
       },
