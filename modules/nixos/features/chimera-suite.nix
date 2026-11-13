@@ -5,7 +5,7 @@
     pkgs,
     ...
   }: let
-    chimera = inputs.chimera-suite.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    chi = inputs.chimera-suite.packages.${pkgs.stdenv.hostPlatform.system}.default;
     port = 8377;
     origin = "http://127.0.0.1:${toString port}";
 
@@ -20,13 +20,13 @@
         esac
         printf '%s' "$event" \
           | jq -r '[.type, .repo // .project, .version // .title, .culprit] | map(select(. and . != "")) | join(" ")' \
-          | curl -fsS --max-time 10 -H "Title: chimera $(printf '%s' "$event" | jq -r .org)" \
+          | curl -fsS --max-time 10 -H "Title: chi $(printf '%s' "$event" | jq -r .org)" \
             -H "Priority: $priority" -H "Click: $(printf '%s' "$event" | jq -r .url)" \
             --data-binary @- http://nyx:2586/notifications >/dev/null
       '';
     };
 
-    hooks = pkgs.linkFarm "chimera-hooks" [
+    hooks = pkgs.linkFarm "chi-hooks" [
       {
         name = "ntfy";
         path = lib.getExe ntfy;
@@ -35,7 +35,7 @@
   in {
     imports = [inputs.agenix.nixosModules.default];
 
-    environment.systemPackages = [chimera];
+    environment.systemPackages = [chi pkgs.sqlite];
 
     age.secrets.cloudflared-chimera.file = ../../../secrets/cloudflared-chimera.age;
 
@@ -45,31 +45,32 @@
         credentialsFile = config.age.secrets.cloudflared-chimera.path;
         default = "http_status:404";
         ingress = {
+          "chi.nshard.com" = origin;
+          # Senders built before the rename still report here.
           "chimera.nshard.com" = origin;
-          "cuentacero-chimera.nshard.com" = origin;
         };
       };
     };
 
-    systemd.services.chimera = {
-      description = "chimera suite";
+    systemd.services.chi = {
+      description = "chi suite";
       wantedBy = ["multi-user.target"];
       wants = ["network-online.target"];
       after = ["network-online.target"];
       environment = {
-        CHIMERA_URL = "https://chimera.nshard.com";
-        CHIMERA_DATA = "/var/lib/chimera";
-        CHIMERA_LISTEN = "127.0.0.1:${toString port}";
-        CHIMERA_HOOKS = "${hooks}";
+        CHI_URL = "https://chi.nshard.com";
+        CHI_DATA = "/var/lib/chi";
+        CHI_LISTEN = "127.0.0.1:${toString port}";
+        CHI_HOOKS = "${hooks}";
         # glibc otherwise keeps a freed 19 MiB password hash resident.
         MALLOC_ARENA_MAX = "1";
         MALLOC_MMAP_THRESHOLD_ = "65536";
         MALLOC_TRIM_THRESHOLD_ = "65536";
       };
       serviceConfig = {
-        ExecStart = "${lib.getExe chimera} serve";
+        ExecStart = "${lib.getExe chi} serve";
         DynamicUser = true;
-        StateDirectory = "chimera";
+        StateDirectory = "chi";
         Restart = "always";
         RestartSec = 5;
         NoNewPrivileges = true;
