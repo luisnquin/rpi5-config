@@ -2,6 +2,7 @@
   flake.modules.nixos.chimera = {
     imports = with inputs.self.modules.nixos; [
       base
+      chimeraSuite
       farm
       nvmeBtrfs
       pavlov

@@ -51,6 +51,26 @@
         "type": "github"
       }
     },
+    "chimera-suite": {
+      "inputs": {
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1794579838,
+        "narHash": "sha256-I3L0eEsIN2JG7l/uRHJ0GXctLpQL74myiHkZukQtOoo=",
+        "ref": "refs/heads/main",
+        "rev": "6c532ff160fc1f96ab4b6aa160b388091daad90d",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@chimera/srv/git/0xc000022070/chimera.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@chimera/srv/git/0xc000022070/chimera.git"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -259,6 +279,7 @@
       "inputs": {
         "agenix": "agenix",
         "black-terminal": "black-terminal",
+        "chimera-suite": "chimera-suite",
         "disko": "disko",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",

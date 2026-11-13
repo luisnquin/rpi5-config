@@ -31,6 +31,10 @@
       url = "github:luisnquin/luisnquin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    chimera-suite = {
+      url = "git+ssh://git@chimera/srv/git/0xc000022070/chimera.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = {
