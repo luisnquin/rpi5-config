@@ -51,7 +51,7 @@
         "type": "github"
       }
     },
-    "chimera-suite": {
+    "chi": {
       "inputs": {
         "nixpkgs": [
           "nixpkgs"
@@ -64,11 +64,11 @@
         "rev": "352315b55d94dfd46ed0cb3ae9005e09965190e5",
         "revCount": 14,
         "type": "git",
-        "url": "ssh://git@chimera/srv/git/0xc000022070/chimera.git"
+        "url": "ssh://git@chimera/srv/git/0xc000022070/chi.git"
       },
       "original": {
         "type": "git",
-        "url": "ssh://git@chimera/srv/git/0xc000022070/chimera.git"
+        "url": "ssh://git@chimera/srv/git/0xc000022070/chi.git"
       }
     },
     "disko": {
@@ -279,7 +279,7 @@
       "inputs": {
         "agenix": "agenix",
         "black-terminal": "black-terminal",
-        "chimera-suite": "chimera-suite",
+        "chi": "chi",
         "disko": "disko",
         "flake-parts": "flake-parts",
         "home-manager": "home-manager",

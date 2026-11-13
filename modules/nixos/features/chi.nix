@@ -1,11 +1,11 @@
 {inputs, ...}: {
-  flake.modules.nixos.chimeraSuite = {
+  flake.modules.nixos.chi = {
     config,
     lib,
     pkgs,
     ...
   }: let
-    chi = inputs.chimera-suite.packages.${pkgs.stdenv.hostPlatform.system}.default;
+    chi = inputs.chi.packages.${pkgs.stdenv.hostPlatform.system}.default;
     port = 8377;
     origin = "http://127.0.0.1:${toString port}";
 
