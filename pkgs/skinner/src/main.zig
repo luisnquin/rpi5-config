@@ -475,11 +475,24 @@ fn props(c: *Ctx, raw: []const u8, out: *std.ArrayList(u8)) void {
     }
 }
 
+fn same_status(prev: []const u8, st: []const u8) bool {
+    var lines = std.mem.splitScalar(u8, prev, '\n');
+    while (lines.next()) |line| {
+        const rest = std.mem.cutPrefix(u8, line, "| status | **") orelse continue;
+        return std.mem.startsWith(u8, rest, st) and std.mem.startsWith(u8, rest[st.len..], "**");
+    }
+    return false;
+}
+
 fn report(c: *Ctx, meta: *Meta, req: Request, env: *Env, log: File) void {
     emit(c, .{ .event = "finished", .time = c.now(), .run = meta.id, .repo = req.repo, .job = req.job, .status = meta.status, .message = meta.message });
     if (std.mem.eql(u8, meta.status, "skipped")) return;
-    var md: std.ArrayList(u8) = .empty;
     const a = c.arena;
+    const repo_dir = env.get("SKINNER_REPO_DIR").?;
+    const target = std.fmt.allocPrint(a, "{s}/skinner", .{repo_dir}) catch oom();
+    const file = std.fmt.allocPrint(a, "{s}/{s}.md", .{ target, req.job }) catch oom();
+    if (read(c, file)) |prev| if (same_status(prev, meta.status)) return;
+    var md: std.ArrayList(u8) = .empty;
     const started = meta.started;
     const finished = meta.finished orelse started;
     md.print(a, "# skinner: {s}\n\n| | |\n| --- | --- |\n", .{req.job}) catch oom();
@@ -496,10 +509,8 @@ fn report(c: *Ctx, meta: *Meta, req: Request, env: *Env, log: File) void {
     if (read(c, c.path("runs/{s}/logcat.txt", .{meta.id}))) |raw|
         md.print(a, "\n## Logcat window (tail)\n\n```text\n{s}\n```\n", .{std.mem.trimEnd(u8, tail(raw, 300), "\n")}) catch oom();
 
-    const repo_dir = env.get("SKINNER_REPO_DIR").?;
-    const target = std.fmt.allocPrint(a, "{s}/skinner", .{repo_dir}) catch oom();
     Dir.cwd().createDirPath(c.io, target) catch return;
-    write(c, std.fmt.allocPrint(a, "{s}/{s}.md", .{ target, req.job }) catch oom(), md.items) catch return;
+    write(c, file, md.items) catch return;
     env.put("SKINNER_MESSAGE", std.fmt.allocPrint(a, "chore(skinner): {s} {s} [skip ci]", .{ req.job, meta.status }) catch oom()) catch oom();
     if (sh(c, publish_script, env, log) != 0)
         emit(c, .{ .event = "report.failed", .time = c.now(), .run = meta.id, .repo = req.repo, .job = req.job, .message = "could not push skinner report" });
@@ -646,6 +657,14 @@ test {
 test "tail" {
     try std.testing.expectEqualStrings("c\nd\n", tail("a\nb\nc\nd\n", 2));
     try std.testing.expectEqualStrings("a\nb", tail("a\nb", 5));
+}
+
+test "same_status" {
+    const prev = "# skinner: e2e\n\n| | |\n| --- | --- |\n| status | **failed**: boom |\n";
+    try std.testing.expect(same_status(prev, "failed"));
+    try std.testing.expect(!same_status(prev, "fail"));
+    try std.testing.expect(!same_status(prev, "passed"));
+    try std.testing.expect(!same_status("", "passed"));
 }
 
 test "verdict" {
