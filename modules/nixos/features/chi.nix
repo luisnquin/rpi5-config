@@ -52,6 +52,9 @@
       };
     };
 
+    # DNS comes from tailscale, which lags network-online at boot; 100ms restarts hit the start limit first.
+    systemd.services."cloudflared-tunnel-8197aee8-115d-4af3-abaa-bbd9ae1fb596".serviceConfig.RestartSec = 5;
+
     systemd.services.chi = {
       description = "chi suite";
       wantedBy = ["multi-user.target"];
