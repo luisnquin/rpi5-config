@@ -5,4 +5,5 @@ in {
   "wifi.env.age".publicKeys = [luisnquin chimera];
   "cloudflared-chimera.age".publicKeys = [luisnquin chimera];
   "pavlov-pin.age".publicKeys = [luisnquin chimera];
+  "chi-github.age".publicKeys = [luisnquin chimera];
 }

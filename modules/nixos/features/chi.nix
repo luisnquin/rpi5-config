@@ -5,9 +5,14 @@
     pkgs,
     ...
   }: let
-    chi = inputs.chi.packages.${pkgs.stdenv.hostPlatform.system}.default;
     port = 8377;
     origin = "http://127.0.0.1:${toString port}";
+
+    # skinner owns nixpkgs.config.allowUnfreePredicate; claude-code comes from its own instance.
+    unfree = import pkgs.path {
+      inherit (pkgs.stdenv.hostPlatform) system;
+      config.allowUnfree = true;
+    };
 
     ntfy = pkgs.writeShellApplication {
       name = "ntfy";
@@ -25,19 +30,15 @@
             --data-binary @- http://nyx:2586/notifications >/dev/null
       '';
     };
-
-    hooks = pkgs.linkFarm "chi-hooks" [
-      {
-        name = "ntfy";
-        path = lib.getExe ntfy;
-      }
-    ];
   in {
-    imports = [inputs.agenix.nixosModules.default];
+    imports = [inputs.agenix.nixosModules.default inputs.chi.nixosModules.default];
 
-    environment.systemPackages = [chi pkgs.sqlite];
+    environment.systemPackages = [config.services.chi.package pkgs.sqlite];
 
-    age.secrets.cloudflared-chimera.file = ../../../secrets/cloudflared-chimera.age;
+    age.secrets = {
+      cloudflared-chimera.file = ../../../secrets/cloudflared-chimera.age;
+      chi-github.file = ../../../secrets/chi-github.age;
+    };
 
     services.cloudflared = {
       enable = true;
@@ -55,33 +56,25 @@
     # DNS comes from tailscale, which lags network-online at boot; 100ms restarts hit the start limit first.
     systemd.services."cloudflared-tunnel-8197aee8-115d-4af3-abaa-bbd9ae1fb596".serviceConfig.RestartSec = 5;
 
+    services.chi = {
+      enable = true;
+      url = "https://chi.nshard.com";
+      listen = "127.0.0.1:${toString port}";
+      hooks.ntfy = lib.getExe ntfy;
+      agents = [unfree.claude-code pkgs.codex];
+      githubSecretFile = config.age.secrets.chi-github.path;
+    };
+
     systemd.services.chi = {
-      description = "chi suite";
-      wantedBy = ["multi-user.target"];
-      wants = ["network-online.target"];
-      after = ["network-online.target"];
       environment = {
-        CHI_URL = "https://chi.nshard.com";
-        CHI_DATA = "/var/lib/chi";
-        CHI_LISTEN = "127.0.0.1:${toString port}";
-        CHI_HOOKS = "${hooks}";
         # glibc otherwise keeps a freed 19 MiB password hash resident.
         MALLOC_ARENA_MAX = "1";
         MALLOC_MMAP_THRESHOLD_ = "65536";
         MALLOC_TRIM_THRESHOLD_ = "65536";
       };
       serviceConfig = {
-        ExecStart = "${lib.getExe chi} serve";
-        DynamicUser = true;
-        StateDirectory = "chi";
-        Restart = "always";
+        Restart = lib.mkForce "always";
         RestartSec = 5;
-        NoNewPrivileges = true;
-        ProtectSystem = "strict";
-        ProtectHome = true;
-        PrivateTmp = true;
-        PrivateDevices = true;
-        RestrictAddressFamilies = ["AF_INET" "AF_INET6" "AF_UNIX"];
       };
     };
   };
