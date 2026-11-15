@@ -8,12 +8,6 @@
     port = 8377;
     origin = "http://127.0.0.1:${toString port}";
 
-    # skinner owns nixpkgs.config.allowUnfreePredicate; claude-code comes from its own instance.
-    unfree = import pkgs.path {
-      inherit (pkgs.stdenv.hostPlatform) system;
-      config.allowUnfree = true;
-    };
-
     ntfy = pkgs.writeShellApplication {
       name = "ntfy";
       runtimeInputs = [pkgs.curl pkgs.jq];
@@ -32,6 +26,13 @@
     };
   in {
     imports = [inputs.agenix.nixosModules.default inputs.chi.nixosModules.default];
+
+    nixpkgs.overlays = [(_: prev: {llm-agents = inputs.llm-agents.packages.${prev.stdenv.hostPlatform.system};})];
+
+    nix.settings = {
+      extra-substituters = ["https://cache.numtide.com"];
+      extra-trusted-public-keys = ["niks3.numtide.com-1:DTx8wZduET09hRmMtKdQDxNNthLQETkc/yaX7M4qK0g="];
+    };
 
     environment.systemPackages = [config.services.chi.package pkgs.sqlite];
 
@@ -61,7 +62,7 @@
       url = "https://chi.nshard.com";
       listen = "127.0.0.1:${toString port}";
       hooks.ntfy = lib.getExe ntfy;
-      agents = [unfree.claude-code pkgs.codex];
+      agents = [pkgs.llm-agents.claude-code pkgs.llm-agents.codex];
       githubSecretFile = config.age.secrets.chi-github.path;
     };
 
