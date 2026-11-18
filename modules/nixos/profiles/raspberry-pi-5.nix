@@ -21,7 +21,7 @@
 
     hardware.raspberry-pi.config.all.base-dt-params.pciex1_gen = {
       enable = true;
-      value = 3;
+      value = 2;
     };
   };
 }
