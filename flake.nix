@@ -36,6 +36,10 @@
       url = "git+ssh://git@chimera/srv/git/0xc000022070/chi.git";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nanovu = {
+      url = "git+ssh://git@chimera/srv/git/0xc000022070/nanovu.git";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
   };
 
   nixConfig = {

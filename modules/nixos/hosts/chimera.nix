@@ -4,6 +4,7 @@
       base
       chi
       farm
+      nanovu
       nvmeBtrfs
       pavlov
       raspberryPi5

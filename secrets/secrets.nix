@@ -6,4 +6,5 @@ in {
   "cloudflared-chimera.age".publicKeys = [luisnquin chimera];
   "pavlov-pin.age".publicKeys = [luisnquin chimera];
   "chi-github.age".publicKeys = [luisnquin chimera];
+  "nanovu-stg-secret-key.age".publicKeys = [luisnquin chimera];
 }

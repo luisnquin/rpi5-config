@@ -105,6 +105,21 @@
         "url": "ssh://git@chimera/srv/git/0xc000022070/chi.git"
       }
     },
+    "crane": {
+      "locked": {
+        "lastModified": 1794962885,
+        "narHash": "sha256-zrweT2tXbcWiJMACOhOr2eYFJKVa6g59ouRaZ3BS5Do=",
+        "owner": "ipetkov",
+        "repo": "crane",
+        "rev": "95e62def851e9d650f0eab63cb4f59a3306e20bd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "ipetkov",
+        "repo": "crane",
+        "type": "github"
+      }
+    },
     "disko": {
       "inputs": {
         "nixpkgs": [
@@ -239,6 +254,27 @@
         "owner": "numtide",
         "repo": "llm-agents.nix",
         "type": "github"
+      }
+    },
+    "nanovu": {
+      "inputs": {
+        "crane": "crane",
+        "nixpkgs": [
+          "nixpkgs"
+        ]
+      },
+      "locked": {
+        "lastModified": 1795200244,
+        "narHash": "sha256-OwBSXvZzyLBidEZfcYaht5ZRUiPIuzYBGGeTylBaDy4=",
+        "ref": "refs/heads/main",
+        "rev": "54dc30350b87d7ffaafcb1ee86f6df9b0279f652",
+        "revCount": 2,
+        "type": "git",
+        "url": "ssh://git@chimera/srv/git/0xc000022070/nanovu.git"
+      },
+      "original": {
+        "type": "git",
+        "url": "ssh://git@chimera/srv/git/0xc000022070/nanovu.git"
       }
     },
     "nixos-config": {
@@ -378,6 +414,7 @@
         "home-manager": "home-manager",
         "identity": "identity",
         "llm-agents": "llm-agents",
+        "nanovu": "nanovu",
         "nixos-config": "nixos-config",
         "nixos-raspberrypi": "nixos-raspberrypi",
         "nixpkgs": "nixpkgs_3",
