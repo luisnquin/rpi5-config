@@ -4,6 +4,8 @@
 
     age.secrets.wifi.file = ../../../secrets/wifi.env.age;
 
+    # Fallback only: the Pi runs on ethernet, whose auto profile wins the
+    # default route; wifi is too slow for chi uploads through the tunnel.
     networking.networkmanager.ensureProfiles = {
       environmentFiles = [config.age.secrets.wifi.path];
       profiles.home-wifi = {
