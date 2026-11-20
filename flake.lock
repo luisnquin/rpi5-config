@@ -266,15 +266,15 @@
       "locked": {
         "lastModified": 1795200244,
         "narHash": "sha256-OwBSXvZzyLBidEZfcYaht5ZRUiPIuzYBGGeTylBaDy4=",
-        "ref": "refs/heads/main",
+        "owner": "0xc000022070",
+        "repo": "nanovu",
         "rev": "54dc30350b87d7ffaafcb1ee86f6df9b0279f652",
-        "revCount": 2,
-        "type": "git",
-        "url": "ssh://git@chimera/srv/git/0xc000022070/nanovu.git"
+        "type": "github"
       },
       "original": {
-        "type": "git",
-        "url": "ssh://git@chimera/srv/git/0xc000022070/nanovu.git"
+        "owner": "0xc000022070",
+        "repo": "nanovu",
+        "type": "github"
       }
     },
     "nixos-config": {
