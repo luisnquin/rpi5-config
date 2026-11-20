@@ -7,4 +7,7 @@ in {
   "pavlov-pin.age".publicKeys = [luisnquin chimera];
   "chi-github.age".publicKeys = [luisnquin chimera];
   "nanovu-stg-secret-key.age".publicKeys = [luisnquin chimera];
+  "nanovu-fcm-dev.age".publicKeys = [luisnquin chimera];
+  "nanovu-fcm-stg.age".publicKeys = [luisnquin chimera];
+  "nanovu-fcm-prod.age".publicKeys = [luisnquin chimera];
 }

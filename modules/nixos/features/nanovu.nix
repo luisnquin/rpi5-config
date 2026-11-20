@@ -8,6 +8,8 @@
 
     age.secrets = {
       nanovu-stg-secret-key.file = ../../../secrets/nanovu-stg-secret-key.age;
+      nanovu-fcm-dev.file = ../../../secrets/nanovu-fcm-dev.age;
+      nanovu-fcm-stg.file = ../../../secrets/nanovu-fcm-stg.age;
     };
 
     services.cloudflared.tunnels."8197aee8-115d-4af3-abaa-bbd9ae1fb596".ingress."nanovu.nshard.com" = "http://${listen}";
@@ -16,6 +18,8 @@
       enable = true;
       credentials = {
         stg-secret-key = paths.nanovu-stg-secret-key.path;
+        fcm-dev = paths.nanovu-fcm-dev.path;
+        fcm-stg = paths.nanovu-fcm-stg.path;
       };
       settings = {
         inherit listen;
@@ -24,6 +28,16 @@
           application_identifier = "O-yUn9zOb_Gl";
           secret_key_file = credential "stg-secret-key";
           bridge_hosts = ["api.nshard.com" "staging-gate-k9-mzni.encr.app"];
+          integrations = {
+            cuentacero-dev = {
+              provider = "fcm";
+              service_account_file = credential "fcm-dev";
+            };
+            cuentacero-stg = {
+              provider = "fcm";
+              service_account_file = credential "fcm-stg";
+            };
+          };
         };
       };
     };
