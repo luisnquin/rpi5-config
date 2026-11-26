@@ -33,7 +33,7 @@
     };
     llm-agents.url = "github:numtide/llm-agents.nix";
     chi = {
-      url = "git+ssh://git@chimera/srv/git/0xc000022070/chi.git";
+      url = "github:0xc000022070/chi";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nanovu = {
